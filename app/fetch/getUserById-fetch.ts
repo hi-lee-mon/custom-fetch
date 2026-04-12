@@ -1,6 +1,6 @@
 import "server-only";
 import { User } from "../api/user/[id]/route";
-import { apiFetch } from "./_lib/fetch/interceptors-fetch";
+import { apiFetch, HttpError } from "./_lib/fetch/interceptors-fetch";
 
 type Result = { isSuccess: true; user: User } | { isSuccess: false; user: null };
 
@@ -14,6 +14,10 @@ export const getUserByIdFetch = async (id: string): Promise<Result> => {
       user: res.data,
     };
   } catch (error) {
+    if (error instanceof HttpError) {
+      console.error(`HTTPエラー: ${error.status} ${error.body}`);
+    }
+
     return {
       isSuccess: false,
       user: null,
