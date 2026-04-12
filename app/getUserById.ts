@@ -1,13 +1,13 @@
 import "server-only";
 
-import axios from "axios";
 import { User } from "./api/user/[id]/route";
+import { server } from "./_lib/axios/server";
 
 type Result = { isSuccess: true; user: User } | { isSuccess: false; user: null };
 
 export const getUserById = async (id: string): Promise<Result> => {
   try {
-    const res = await axios.get<User>(`http://localhost:3000/api/user/${id}`);
+    const res = await server.get<User>(`/user/${id}`);
     return {
       isSuccess: true,
       user: res.data,

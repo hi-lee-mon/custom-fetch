@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
+import { getToken } from "./getToken";
 
 export const verifySession = async () => {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = await getToken();
 
   if (!token) {
     return null;
