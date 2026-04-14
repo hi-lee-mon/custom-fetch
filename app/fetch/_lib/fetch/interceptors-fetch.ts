@@ -12,6 +12,13 @@ export class HttpError extends Error {
   }
 }
 
+export class TimeoutError extends Error {
+  constructor() {
+    super("Request timeout");
+    this.name = "TimeoutError";
+  }
+}
+
 async function parseErrorBody(response: Response) {
   const contentType = response.headers.get("content-type");
 
@@ -24,13 +31,15 @@ async function parseErrorBody(response: Response) {
 
 type ApiFetchOptions = RequestInit & {
   skipAuth?: boolean;
+  timeoutMs?: number;
 };
 
 export async function apiFetch<T>(
   input: RequestInfo | URL,
   options: ApiFetchOptions = {},
 ): Promise<{ response: Response; data: T }> {
-  const { skipAuth, headers, ...rest } = options;
+  // デフォルト5秒でタイムアウト
+  const { skipAuth, headers, timeoutMs = 5000, ...rest } = options;
 
   const token = await getToken();
   const mergedHeaders = new Headers(headers);
@@ -40,25 +49,42 @@ export async function apiFetch<T>(
   }
   console.log("[リクエストをインターセプト]", rest.method ?? "GET", input);
 
-  // TODO:Base URL実装
-  const response = await fetch(`http://localhost:3000/api${input}`, {
-    ...rest,
-    headers: mergedHeaders,
-  });
+  const controller = new AbortController();
 
-  console.log("[レスポンスをインターセプト]", response.status, input);
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
 
-  if (!response.ok) {
-    const errorBody = await parseErrorBody(response);
+  try {
+    // TODO:Base URL実装
+    const response = await fetch(`http://localhost:3000/api${input}`, {
+      ...rest,
+      headers: mergedHeaders,
+      signal: controller.signal,
+    });
 
-    if (response.status === 401) {
-      console.log("認証切れ");
+    console.log("[レスポンスをインターセプト]", response.status, input);
+
+    if (!response.ok) {
+      const errorBody = await parseErrorBody(response);
+
+      if (response.status === 401) {
+        console.log("認証切れ");
+      }
+
+      throw new HttpError(response.status, errorBody);
     }
 
-    throw new HttpError(response.status, errorBody);
+    const data = (await response.json()) as T;
+
+    return { response, data };
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new TimeoutError();
+    }
+    console.error("Fetchエラー:", error);
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  const data = (await response.json()) as T;
-
-  return { response, data };
 }

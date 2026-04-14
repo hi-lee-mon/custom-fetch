@@ -7,7 +7,9 @@ type Result = { isSuccess: true; user: User } | { isSuccess: false; user: null }
 
 export const getUserById = async (id: string): Promise<Result> => {
   try {
-    const res = await server.get<User>(`/user/${id}`);
+    const res = await server.get<User>(`/user/${id}`, {
+      timeout: 1000, // 1秒でタイムアウト
+    });
     return {
       isSuccess: true,
       user: res.data,
