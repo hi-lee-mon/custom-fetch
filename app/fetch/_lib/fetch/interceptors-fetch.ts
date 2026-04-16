@@ -1,4 +1,5 @@
 import { getToken } from "@/app/_lib/getToken";
+import { ApiFetchOptions } from "./type";
 
 export class HttpError extends Error {
   status: number;
@@ -29,15 +30,10 @@ async function parseErrorBody(response: Response) {
   return response.text();
 }
 
-type ApiFetchOptions = RequestInit & {
-  skipAuth?: boolean;
-  timeoutMs?: number;
-};
-
-export async function apiFetch<T>(
+export async function apiFetch(
   input: RequestInfo | URL,
   options: ApiFetchOptions = {},
-): Promise<{ response: Response; data: T }> {
+): Promise<Response> {
   // デフォルト5秒でタイムアウト
   const { skipAuth, headers, timeoutMs = 5000, ...rest } = options;
 
@@ -75,9 +71,7 @@ export async function apiFetch<T>(
       throw new HttpError(response.status, errorBody);
     }
 
-    const data = (await response.json()) as T;
-
-    return { response, data };
+    return response;
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
       throw new TimeoutError();
