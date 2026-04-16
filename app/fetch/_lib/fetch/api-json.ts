@@ -1,11 +1,6 @@
 import { apiFetch } from "./interceptors-fetch";
-import { ApiFetchOptions } from "./type";
+import { ApiJsonOptions } from "./type";
 
-type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
-
-type ApiJsonOptions = Omit<ApiFetchOptions, "body"> & {
-  body?: JsonValue;
-};
 export async function apiJson<T>(
   input: RequestInfo | URL,
   options: ApiJsonOptions = {},

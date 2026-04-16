@@ -53,7 +53,7 @@ export async function apiFetch(
 
   try {
     // TODO:Base URL実装
-    const response = await fetch(`http://localhost:3000/api${input}`, {
+    const response = await fetch(`${input}`, {
       ...rest,
       headers: mergedHeaders,
       signal: controller.signal,
