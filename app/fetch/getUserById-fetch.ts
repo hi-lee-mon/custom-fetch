@@ -1,7 +1,7 @@
 import "server-only";
 import { User } from "../api/user/[id]/route";
 import { HttpError, TimeoutError } from "./_lib/fetch/core/custom-fetch";
-import { server } from "./_lib/fetch/server/server";
+import { server } from "./_lib/fetch/client/server";
 
 type Result = { isSuccess: true; user: User } | { isSuccess: false; user: null };
 
