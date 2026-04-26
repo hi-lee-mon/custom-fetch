@@ -1,6 +1,7 @@
 import { unauthorized } from "next/navigation";
 import { verifySession } from "../_lib/verifySession";
 import { getUserByIdFetch } from "./getUserById-fetch";
+import DownloadView from "./conponents/download-view";
 
 export default async function Home() {
   const session = await verifySession();
@@ -27,6 +28,7 @@ export default async function Home() {
         <li>Name: {res.user.name}</li>
         <li>Age: {res.user.age}</li>
       </ul>
+      <DownloadView />
     </div>
   );
 }

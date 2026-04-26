@@ -1,13 +1,13 @@
 import "server-only";
 import { User } from "../api/user/[id]/route";
-import { apiFetch, HttpError, TimeoutError } from "./_lib/fetch/interceptors-fetch";
-import { apiJson } from "./_lib/fetch/api-json";
+import { HttpError, TimeoutError } from "./_lib/fetch/core/custom-fetch";
+import { server } from "./_lib/fetch/server/server";
 
 type Result = { isSuccess: true; user: User } | { isSuccess: false; user: null };
 
 export const getUserByIdFetch = async (id: string): Promise<Result> => {
   try {
-    const res = await apiJson<User>(`/user/${id}`, {
+    const res = await server.json<User>(`/user/${id}`, {
       method: "GET",
       timeoutMs: 5000,
     });
